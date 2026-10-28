@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Manager</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 30px 15px;
+            font-family: Arial, sans-serif;
+            background: #111827;
+            color: white;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+        }
+
+        .card {
+            background: #1f2937;
+            border: 1px solid #374151;
+            padding: 24px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .version {
+            color: #93c5fd;
+            font-weight: bold;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 7px;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #4b5563;
+            border-radius: 7px;
+            background: #111827;
+            color: white;
+        }
+
+        button {
+            margin-top: 18px;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 7px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+        .delete {
+            background: #dc2626;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 7px;
+            background: #14532d;
+        }
+
+        .credential {
+            border-top: 1px solid #374151;
+            padding: 15px 0;
+            overflow-wrap: anywhere;
+        }
+
+        .muted {
+            color: #9ca3af;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+
+        <header>
+            <span class="version">{{ version | upper }}</span>
+            <h1>Password Manager</h1>
+
+            {% if version == "v1" %}
+                <p>Add credentials</p>
+            {% elif version == "v2" %}
+                <p>Add and view credentials</p>
+            {% else %}
+                <p>Add, view and delete credentials</p>
+            {% endif %}
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <p class="message">{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <section class="card">
+            <h2>Add Credentials</h2>
+
+            <form action="/add" method="POST">
+                <label for="website">Website Name</label>
+                <input
+                    id="website"
+                    name="website"
+                    type="text"
+                    placeholder="Example: GitHub"
+                    required
+                >
+
+                <label for="username">Username</label>
+                <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Enter a test username"
+                    required
+                >
+
+                <label for="password">Password</label>
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter a test password"
+                    required
+                >
+
+                <button type="submit">Add Credentials</button>
+            </form>
+        </section>
+
+        {% if can_view %}
+            <section class="card">
+                <h2>Saved Credentials</h2>
+
+                {% if credentials %}
+                    {% for credential in credentials %}
+                        <div class="credential">
+                            <h3>{{ credential.website }}</h3>
+
+                            <p>
+                                <strong>Username:</strong>
+                                {{ credential.username }}
+                            </p>
+
+                            <p>
+                                <strong>Password:</strong>
+                                ********
+                            </p>
+
+                            {% if can_delete %}
+                                <form
+                                    action="/delete/{{ credential.id }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Delete this credential?')"
+                                >
+                                    <button class="delete" type="submit">
+                                        Delete
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="muted">No credentials saved yet.</p>
+                {% endif %}
+            </section>
+        {% endif %}
+
+        <p class="muted">
+            Educational demonstration only. Do not enter real passwords.
+        </p>
+
+    </main>
+</body>
+</html>
